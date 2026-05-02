@@ -1,60 +1,55 @@
-# OpenClaw + OpenCode Dev Bridge v1.0
+# OpenClaw Dev Bridge
 
-## Mobile-First AI Development Workflow for Windows
-
-A single-click installer that sets up an AI-powered development bridge on your Windows PC. Control it from Telegram — build code, review PRs, push to GitHub, all from your phone.
+Mobile-first AI development workflow. Issue commands from Telegram, execute on your Windows PC. OpenClaw is the PM brain, OpenCode does the heavy lifting.
 
 ---
 
 ## Quick Start
 
-### Option A: PowerShell (recommended)
+### One-liner
+
 ```powershell
-# Right-click PowerShell -> Run as Administrator
-cd C:\path\to\download
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+powershell -c "irm https://raw.githubusercontent.com/firyomaefx/openclaw-dev-bridge/main/install.ps1 | iex"
+```
+
+Works on Windows 10/11 x64. Installs Node.js, Git, OpenClaw, OpenCode, PM2, and Ollama (optional). Just follow the prompts.
+
+### Hackable
+
+```powershell
+git clone https://github.com/firyomaefx/openclaw-dev-bridge.git
+cd openclaw-dev-bridge
 .\install.ps1
 ```
-Enter your keys when prompted. Done in 10-25 minutes.
 
-### Option B: Batch file
-1. **Download** `install.bat` 
-2. **Right-click → Run as Administrator**
-3. **Answer prompts**
+### Beta
 
-If `install.bat` shows garbled characters or hangs, use Option A instead.
-
-What gets installed:
-- Node.js (via winget, if missing)
-- Git (via winget, if missing)
-- Ollama (optional, for local AI models)
-- openclaw + opencode-ai + pm2 (npm packages)
-- OpenClaw Dev Bridge config + PM2 daemon
-
-**Time:** ~10-25 minutes | **Disk:** ~7-10 GB (mostly npm + Ollama model)
+Switch to pre-release channel later with `openclaw update --channel beta`.
 
 ---
 
-## Prerequisites (gather before running)
+## Prerequisites
 
-| Item | Where to get it |
-|------|----------------|
-| **Telegram Bot Token** | Message `@BotFather` → `/newbot` → copy token |
-| **Telegram User ID** | Message `@userinfobot` → copy your numeric ID |
-| **OpenCode API Key** | Go to https://opencode.ai/auth → sign in → API Keys |
+Gather these before running the installer:
+
+| Item | Source |
+|------|--------|
+| Telegram Bot Token | `@BotFather` on Telegram → `/newbot` |
+| Telegram User ID | `@userinfobot` on Telegram → send any message |
+| OpenCode API Key | https://opencode.ai/auth → sign in → API Keys |
 
 ---
 
 ## Telegram Commands
 
-| Command | Description | What happens |
-|---------|-------------|--------------|
-| `/ask hello` | Ask anything | Direct LLM response in Telegram |
-| `/beta Build a REST API with FastAPI` | Generate code | Dispatches to OpenCode ACP agent |
-| `/plan Login with JWT` | Get design docs | Replies with PRD + spec, no code |
-| `/status` | Check queue | Counts pending/in-progress/done tasks |
-| `/push` | Git push | Stages, commits, pushes current work |
-| `/review` | Code review | Reviews last diff in repo, reports issues |
+| Command | Does | Response time |
+|---------|------|--------------|
+| `/ask hello` | Direct LLM answer | < 15s |
+| `/beta Build a REST API` | Dispatch to OpenCode ACP | < 2 min |
+| `/plan Feature name` | Get PRD + spec breakdown | < 30s |
+| `/status` | View task queue counts | < 5s |
+| `/push` | Git add + commit + push | < 1 min |
+| `/review` | Code review last diff | < 2 min |
 
 ---
 
@@ -64,75 +59,37 @@ What gets installed:
 pm2 logs openclaw-gw        # Real-time gateway logs
 pm2 restart openclaw-gw     # Restart after config changes
 pm2 stop openclaw-gw        # Shutdown
-pm2 status                  # Show all processes
+pm2 delete openclaw-gw      # Remove from PM2
 ```
 
-- Gateway URL: `http://127.0.0.1:18789`
-- Config: `%USERPROFILE%\.openclaw\openclaw.json`
-- Logs: `%TEMP%\openclaw\`
-- Task queue: `%USERPROFILE%\.openclaw\tasks\`
+- **Gateway:** http://127.0.0.1:18789
+- **Config:** `%USERPROFILE%\.openclaw\openclaw.json`
+- **Task queue:** `%USERPROFILE%\.openclaw\tasks\`
+- **Logs:** `%TEMP%\openclaw\`
 
 ---
 
 ## System Requirements
 
-- **Windows 10/11 x64**
-- **Node.js >= 22.14** (auto-installed if missing)
-- **Git** (auto-installed if missing)
-- **Ollama** (optional — for local AI models)
-- **Internet** — for Telegram API + npm packages + cloud LLMs
-
----
-
-## First Run Example
-
-```
-1. Send to your bot: /ask what is your role
-   → Bot replies: "PM for the dev dispatch hub..."
-
-2. Send: /beta Create a hello-world Python script in C:\Dev\Projects\hello
-   → Bot ack, dispatches, returns result
-
-3. Send: /status
-   → Shows: "1 done, 0 pending"
-
-4. Send: /push
-   → Git add + commit + push to remote
-```
+| Component | Required | Auto-installed |
+|-----------|----------|---------------|
+| Windows 10/11 x64 | Yes | — |
+| Node.js >= 22.14 | Yes | winget |
+| Git >= 2.30 | Yes | winget |
+| Ollama | Optional | winget |
+| Disk space | ~10 GB | — |
 
 ---
 
 ## Troubleshooting
 
-### Gateway won't start
-```powershell
-pm2 logs openclaw-gw --lines 50
-```
-Check `%TEMP%\openclaw\` for error logs.
+**Garbled text in terminal?** Use `install.ps1` (PowerShell) instead of `install.bat`.
 
-### Telegram bot not responding
-1. Verify token in `%USERPROFILE%\.openclaw\openclaw.json` → `channels.telegram.botToken`
-2. Verify your user ID is in `allowFrom` array
-3. Restart: `pm2 restart openclaw-gw`
+**Gateway won't start?** Run `pm2 logs openclaw-gw --lines 50`.
 
-### Node.js install fails via winget
-Download from https://nodejs.org (LTS), then re-run `install.bat`.
+**Bot not responding?** Verify bot token and user ID in `%USERPROFILE%\.openclaw\openclaw.json` → `channels.telegram`.
 
-### Ollama model download stuck
-Skip Ollama during setup and use cloud models only. Add to config:
-```json
-"models": { "providers": { "openrouter": { ... } } }
-```
-
----
-
-## Files
-
-```
-install.bat          ← Run this
-openclaw.template.json   ← Config template (for reference)
-ecosystem.config.cjs     ← PM2 config (for reference)
-```
+**Node.js fails via winget?** Download manually from https://nodejs.org, then re-run installer.
 
 ---
 
@@ -142,4 +99,4 @@ v1.0 — May 2026
 
 ## Author
 
-Pedot
+firyomaefx
