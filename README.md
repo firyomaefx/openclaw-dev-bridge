@@ -9,7 +9,7 @@ Mobile-first AI development workflow. Issue commands from Telegram, execute on y
 ### One-liner
 
 ```powershell
-powershell -c "irm https://raw.githubusercontent.com/firyomaefx/openclaw-dev-bridge/main/install.ps1 | iex"
+powershell -c "irm https://raw.githubusercontent.com/firyomaefx/openclaw-dev-bridge/master/install.ps1 | iex"
 ```
 
 Works on Windows 10/11 x64. Installs Node.js, Git, OpenClaw, OpenCode, PM2, and Ollama (optional). Just follow the prompts.
